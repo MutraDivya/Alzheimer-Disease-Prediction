@@ -1,0 +1,7 @@
+*.pth
+*.zip
+
+results/
+dataset/
+__pycache__/
+*.pyc

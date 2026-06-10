@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home – Alzheimer’s Disease Prediction</title>
+
+    <!-- CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/templatemo-kind-heart-charity.css') }}" rel="stylesheet">
+
+    <style>
+        .upload-box {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, .1);
+            text-align: center;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            background: #3498db;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: .2s;
+        }
+
+        .file-input-label:hover {
+            background: #2980b9;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            max-height: 380px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, .15);
+            display: none;
+        }
+
+        .orange-button {
+            background: #f5a623;
+            color: #fff;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            display: none;
+        }
+
+        .result-box.show {
+            display: block;
+        }
+
+        .confidence-bar {
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0;
+            transition: width .5s ease;
+        }
+
+        .spinner {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg bg-light shadow-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo img-fluid" alt="">
+                <span>Alzheimer’s Prediction<br><small>CNN-Swin Transformer</small></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2>Alzheimer’s Disease Prediction</h2>
+                    <p class="lead">Upload an MRI image to get the disease stage.</p>
+                </div>
+            </div>
+
+            <!-- Upload + Result Box -->
+            <div class="upload-box">
+                <h3 class="mb-4">Upload MRI Image</h3>
+
+                <form action="{{ url_for('home') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+                    <input type="file" name="mriImage" id="mriImage" accept="image/*" required style="display:none;">
+                    <label for="mriImage" class="file-input-label">
+                        Choose MRI Image
+                    </label>
+
+                    <!-- SINGLE SHARED PREVIEW IMAGE -->
+                    <img id="preview" class="preview-img" src="" alt="MRI Preview">
+
+                    <br><br>
+                    <button type="submit" class="orange-button" id="predictBtn">
+                        <span class="spinner">Predicting...</span>
+                        <span class="text">Predict Stage</span>
+                    </button>
+                </form>
+
+                <!-- RESULT BOX (Uses same #preview image) -->
+                {% if prediction %}
+                <div class="result-box show">
+                    <h4>Prediction Result</h4>
+
+                    <p><strong>Predicted Stage:</strong>
+                        <span style="color:#f5a623; font-weight:600; font-size:1.2rem;">{{ prediction }}</span>
+                    </p>
+
+                    <p><strong>Confidence:</strong> {{ confidence }}%</p>
+
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width:{{ confidence }}%"></div>
+                    </div>
+                 
+
+
+                    <small class="text-muted d-block mt-3">
+                        CNN-Swin Transformer Hybrid Model
+                    </small>
+                </div>
+                {% endif %}
+
+                <!-- ERROR MESSAGES -->
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="alert alert-danger mt-4">
+                    {% for msg in messages %}
+                    <p class="mb-0"><strong>Error:</strong> {{ msg }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Info -->
+            <div class="alert alert-info mt-5">
+                <h6>Important</h6>
+                <ul class="mb-0">
+                    <li>Upload clear MRI brain scans</li>
+                    <li>Supported: JPG, PNG, JPEG</li>
+                    <li>Results for research only</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container text-center">
+            <p class="copyright-text mb-0">Copyright © 2025 Alzheimer’s Prediction System</p>
+        </div>
+    </footer>
+
+    <!-- JS -->
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+
+    <script>
+        const fileInput = document.getElementById('mriImage');
+        const preview = document.getElementById('preview');
+        const predictBtn = document.getElementById('predictBtn');
+        const spinner = predictBtn.querySelector('.spinner');
+        const btnText = predictBtn.querySelector('.text');
+
+        // Live preview on file select
+        fileInput.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => {
+                preview.src = ev.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Show loading state on submit
+        document.getElementById('uploadForm').addEventListener('submit', () => {
+            spinner.style.display = 'inline-block';
+            btnText.style.display = 'none';
+            predictBtn.disabled = true;
+        });
+
+        // On page load: restore image from Flask (after prediction)
+        document.addEventListener('DOMContentLoaded', () => {
+            {% if image_data_url %}
+            preview.src = "{{ image_data_url }}";
+            preview.style.display = 'block';
+            {% endif %}
+        });
+    </script>
+
+
+
+</body>
+
+</html>
